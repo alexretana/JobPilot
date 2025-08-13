@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if query %}Search Results for "{{ query }}" - JobPilot{% else %}Job Search - JobPilot{% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Search Header -->
+<div class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Search Form -->
+        <form method="GET" class="mb-4">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <div class="flex-1">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input 
+                            type="text" 
+                            name="q"
+                            value="{{ query or '' }}"
+                            class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg text-lg placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            placeholder="Search jobs with AI-powered semantic matching..."
+                            autocomplete="off"
+                        >
+                    </div>
+                </div>
+                <button 
+                    type="submit" 
+                    class="px-8 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors"
+                >
+                    <i class="fas fa-search mr-2"></i>
+                    Search
+                </button>
+            </div>
+            
+            <!-- Preserve existing filters -->
+            {% for key, values in request.args.lists() %}
+                {% if key != 'q' and key != 'page' %}
+                    {% if values %}
+                        {% for value in values %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </form>
+
+        <!-- Search Results Info -->
+        {% if query %}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div class="mb-2 sm:mb-0">
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        Search Results for "{{ query }}"
+                    </h1>
+                    <p class="text-gray-600">
+                        {% if matches %}
+                            Found {{ matches|length }} job{{ 's' if matches|length != 1 else '' }}
+                            {% if search_time > 0 %}in {{ "%.3f"|format(search_time) }} seconds{% endif %}
+                        {% else %}
+                            No jobs found
+                        {% endif %}
+                        {% if is_authenticated %}• Personalized for you{% endif %}
+                    </p>
+                </div>
+                
+                {% if search_time > 0 %}
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-bolt text-semantic-500 mr-1"></i>
+                        AI-powered semantic search
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Find Your Perfect Job</h1>
+            <p class="text-gray-600">Use our AI-powered search to find jobs that match your skills and interests</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="lg:grid lg:grid-cols-4 lg:gap-8">
+        <!-- Filters Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8 lg:mb-0 sticky top-24">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-filter mr-2"></i>
+                    Filters
+                </h3>
+                
+                <form method="GET" id="filter-form">
+                    <!-- Preserve search query -->
+                    <input type="hidden" name="q" value="{{ query or '' }}">
+                    
+                    <!-- Job Type -->
+                    <div class="mb-6">
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">Job Type</h4>
+                        <div class="space-y-2">
+                            {% for job_type in filter_options.job_types %}
+                                <label class="flex items-center">
+                                    <input 
+                                        type="checkbox" 
+                                        name="job_type" 
+                                        value="{{ job_type }}"
+                                        {% if job_type in request.args.getlist('job_type') %}checked{% endif %}
+                                        class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                        onchange="document.getElementById('filter-form').submit()"
+                                    >
+                                    <span class="ml-2 text-sm text-gray-600">{{ job_type }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Remote Type -->
+                    <div class="mb-6">
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">Work Style</h4>
+                        <div class="space-y-2">
+                            {% for remote_type in filter_options.remote_types %}
+                                <label class="flex items-center">
+                                    <input 
+                                        type="checkbox" 
+                                        name="remote_type" 
+                                        value="{{ remote_type }}"
+                                        {% if remote_type in request.args.getlist('remote_type') %}checked{% endif %}
+                                        class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                        onchange="document.getElementById('filter-form').submit()"
+                                    >
+                                    <span class="ml-2 text-sm text-gray-600">{{ remote_type }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Experience Level -->
+                    <div class="mb-6">
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">Experience Level</h4>
+                        <div class="space-y-2">
+                            {% for level in filter_options.experience_levels %}
+                                <label class="flex items-center">
+                                    <input 
+                                        type="checkbox" 
+                                        name="experience_level" 
+                                        value="{{ level }}"
+                                        {% if level in request.args.getlist('experience_level') %}checked{% endif %}
+                                        class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                        onchange="document.getElementById('filter-form').submit()"
+                                    >
+                                    <span class="ml-2 text-sm text-gray-600">{{ level.replace('_', ' ').title() }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Salary Range -->
+                    <div class="mb-6">
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">Salary Range</h4>
+                        <div class="space-y-2">
+                            {% for range in filter_options.salary_ranges %}
+                                <label class="flex items-center">
+                                    <input 
+                                        type="radio" 
+                                        name="salary_range" 
+                                        value="{{ range.min }}{% if range.max %}-{{ range.max }}{% endif %}"
+                                        class="border-gray-300 text-primary-600 focus:ring-primary-500"
+                                        onchange="updateSalaryFilters(this); document.getElementById('filter-form').submit()"
+                                    >
+                                    <span class="ml-2 text-sm text-gray-600">{{ range.label }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="min_salary" id="min_salary" value="{{ request.args.get('min_salary', '') }}">
+                        <input type="hidden" name="max_salary" id="max_salary" value="{{ request.args.get('max_salary', '') }}">
+                    </div>
+                    
+                    <!-- Clear Filters -->
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <a href="{{ url_for('search', q=query) }}" class="text-sm text-primary-600 hover:text-primary-700">
+                            <i class="fas fa-times mr-1"></i>
+                            Clear all filters
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Results -->
+        <div class="lg:col-span-3">
+            {% if matches %}
+                <!-- Job Cards -->
+                <div class="space-y-6">
+                    {% for match in matches %}
+                        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-100">
+                            <!-- Job Header -->
+                            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-4">
+                                <div class="flex-1 mb-4 lg:mb-0">
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                                        <a href="{{ url_for('job_detail', job_id=match.job_id) }}" class="hover:text-primary-600 transition-colors">
+                                            {{ match.job_title }}
+                                        </a>
+                                    </h3>
+                                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-building mr-1"></i>
+                                            {{ match.company }}
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-map-marker-alt mr-1"></i>
+                                            {{ match.location }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Match Score -->
+                                <div class="flex flex-col items-end space-y-2">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="text-sm font-medium text-gray-700">Match Score:</div>
+                                        <div class="px-3 py-1 rounded-full text-sm font-semibold {% if match.overall_score >= 0.8 %}bg-green-100 text-green-800{% elif match.overall_score >= 0.6 %}bg-yellow-100 text-yellow-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            {{ "%.0f"|format(match.overall_score * 100) }}%
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Detailed Scores -->
+                                    <div class="text-xs text-gray-500 space-y-1">
+                                        <div>Semantic: {{ "%.1f"|format(match.semantic_score * 100) }}%</div>
+                                        {% if is_authenticated %}
+                                            <div>Skills: {{ "%.0f"|format(match.skills_match_score * 100) }}%</div>
+                                            <div>Experience: {{ "%.0f"|format(match.experience_match_score * 100) }}%</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Skills and Tags -->
+                            {% if match.raw_job_data.get('skills_required') %}
+                                <div class="mb-4">
+                                    <div class="flex flex-wrap gap-2">
+                                        {% for skill in match.raw_job_data.skills_required[:5] %}
+                                            <span class="px-2 py-1 text-xs bg-primary-100 text-primary-800 rounded-full">
+                                                {{ skill }}
+                                            </span>
+                                        {% endfor %}
+                                        {% if match.raw_job_data.skills_required|length > 5 %}
+                                            <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+                                                +{{ match.raw_job_data.skills_required|length - 5 }} more
+                                            </span>
+                                        {% endif %}
+                                        
+                                        <!-- Job Type and Remote badges -->
+                                        {% if match.raw_job_data.get('job_type') %}
+                                            <span class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                {{ match.raw_job_data.job_type }}
+                                            </span>
+                                        {% endif %}
+                                        
+                                        {% if match.raw_job_data.get('remote_type') %}
+                                            <span class="px-2 py-1 text-xs {% if match.raw_job_data.remote_type == 'Remote' %}bg-green-100 text-green-800{% elif match.raw_job_data.remote_type == 'Hybrid' %}bg-purple-100 text-purple-800{% else %}bg-gray-100 text-gray-800{% endif %} rounded-full">
+                                                {{ match.raw_job_data.remote_type }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Match Reasons -->
+                            {% if match.match_reasons %}
+                                <div class="mb-4">
+                                    <h4 class="text-sm font-medium text-gray-900 mb-2">
+                                        <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+                                        Why this job matches:
+                                    </h4>
+                                    <ul class="text-sm text-gray-600 space-y-1">
+                                        {% for reason in match.match_reasons[:3] %}
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-semantic-500 mt-1 mr-2 text-xs"></i>
+                                                {{ reason }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Job Details Footer -->
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center space-x-4 mb-2 sm:mb-0">
+                                    {% if match.raw_job_data.get('salary_min') or match.raw_job_data.get('salary_max') %}
+                                        <div class="text-sm font-medium text-gray-900">
+                                            <i class="fas fa-dollar-sign text-green-500 mr-1"></i>
+                                            {% if match.raw_job_data.salary_min and match.raw_job_data.salary_max %}
+                                                ${{ "{:,}".format(match.raw_job_data.salary_min) }} - ${{ "{:,}".format(match.raw_job_data.salary_max) }}
+                                            {% elif match.raw_job_data.salary_min %}
+                                                ${{ "{:,}".format(match.raw_job_data.salary_min) }}+
+                                            {% else %}
+                                                Up to ${{ "{:,}".format(match.raw_job_data.salary_max) }}
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if match.raw_job_data.get('experience_level') %}
+                                        <div class="text-sm text-gray-600">
+                                            <i class="fas fa-user-tie mr-1"></i>
+                                            {{ match.raw_job_data.experience_level.replace('_', ' ').title() }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="flex items-center space-x-3">
+                                    <div class="text-xs text-gray-400">
+                                        {% if match.raw_job_data.get('posted_date') %}
+                                            Posted {{ match.raw_job_data.posted_date.strftime('%b %d') }}
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <a href="{{ url_for('job_detail', job_id=match.job_id) }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
+                                        View Details
+                                        <i class="fas fa-arrow-right ml-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Load More / Pagination -->
+                {% if matches|length == per_page %}
+                    <div class="text-center mt-8">
+                        <a href="{{ url_for('search', q=query, page=(page+1), **request.args.to_dict()) }}" class="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                            <i class="fas fa-chevron-down mr-2"></i>
+                            Load More Jobs
+                        </a>
+                    </div>
+                {% endif %}
+            {% elif query %}
+                <!-- No Results -->
+                <div class="text-center py-12">
+                    <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-gray-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No jobs found for "{{ query }}"</h3>
+                    <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                        Try adjusting your search terms or filters. Our AI-powered search understands context, so try related terms too.
+                    </p>
+                    
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-500">Suggestions:</p>
+                        <div class="flex flex-wrap justify-center gap-2">
+                            <button onclick="searchSuggestion('software developer')" class="px-3 py-1 text-sm bg-gray-100 hover:bg-primary-100 text-gray-700 hover:text-primary-700 rounded-full transition-colors">
+                                Software Developer
+                            </button>
+                            <button onclick="searchSuggestion('data analyst')" class="px-3 py-1 text-sm bg-gray-100 hover:bg-primary-100 text-gray-700 hover:text-primary-700 rounded-full transition-colors">
+                                Data Analyst
+                            </button>
+                            <button onclick="searchSuggestion('product manager')" class="px-3 py-1 text-sm bg-gray-100 hover:bg-primary-100 text-gray-700 hover:text-primary-700 rounded-full transition-colors">
+                                Product Manager
+                            </button>
+                            <button onclick="searchSuggestion('remote jobs')" class="px-3 py-1 text-sm bg-gray-100 hover:bg-primary-100 text-gray-700 hover:text-primary-700 rounded-full transition-colors">
+                                Remote Jobs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Search Prompt -->
+                <div class="text-center py-12">
+                    <div class="w-24 h-24 bg-gradient-to-r from-primary-500 to-semantic-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-rocket text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Start Your AI-Powered Job Search</h3>
+                    <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                        Enter your search query above to find jobs that match your skills and interests using our semantic matching technology.
+                    </p>
+                    
+                    {% if not is_authenticated %}
+                        <a href="{{ url_for('profile') }}" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Create Profile for Better Matches
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateSalaryFilters(radio) {
+    const value = radio.value;
+    const minSalary = document.getElementById('min_salary');
+    const maxSalary = document.getElementById('max_salary');
+    
+    if (value.includes('-')) {
+        const [min, max] = value.split('-');
+        minSalary.value = min;
+        maxSalary.value = max;
+    } else {
+        minSalary.value = value;
+        maxSalary.value = '';
+    }
+}
+
+function searchSuggestion(query) {
+    const searchInput = document.querySelector('input[name="q"]');
+    const form = searchInput.closest('form');
+    
+    searchInput.value = query;
+    form.submit();
+}
+
+// Auto-submit filter form when checkboxes change
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filter-form');
+    
+    // Add loading state to filter changes
+    const filterInputs = filterForm.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // Add loading indicator
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 z-50';
+            loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating results...';
+            document.body.appendChild(loadingDiv);
+        });
+    });
+});
+</script>
+{% endblock %}

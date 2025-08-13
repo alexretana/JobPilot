@@ -236,6 +236,24 @@ class JobRepository(LoggerMixin):
             log_error(e, "searching jobs")
             return []
     
+    def get_recent_jobs(self, limit: int = 20) -> List[JobListingDB]:
+        """Get most recently posted jobs."""
+        try:
+            with self.db_manager.get_session() as session:
+                jobs = (session.query(JobListingDB)
+                       .order_by(JobListingDB.posted_date.desc())
+                       .limit(limit)
+                       .all())
+                
+                # Detach from session so they can be used outside
+                for job in jobs:
+                    session.expunge(job)
+                
+                return jobs
+        except Exception as e:
+            log_error(e, "getting recent jobs")
+            return []
+    
     def delete_job(self, job_id: str) -> bool:
         """Delete a job listing."""
         try:

@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} at {{ job.company }} - JobPilot{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Back Navigation -->
+    <div class="mb-6">
+        <a href="javascript:history.back()" class="text-primary-600 hover:text-primary-700 font-medium">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back to Results
+        </a>
+    </div>
+    
+    <!-- Job Header -->
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8 border border-gray-200">
+        <div class="flex justify-between items-start mb-6">
+            <div class="flex-1">
+                <h1 class="text-3xl font-bold text-gray-900 mb-3">{{ job.title }}</h1>
+                <div class="flex flex-wrap items-center gap-4 text-gray-600 mb-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-building mr-2 text-primary-600"></i>
+                        <span class="font-medium">{{ job.company }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-map-marker-alt mr-2 text-primary-600"></i>
+                        <span>{{ job.location }}</span>
+                    </div>
+                    {% if job.job_type %}
+                    <div class="flex items-center">
+                        <i class="fas fa-briefcase mr-2 text-primary-600"></i>
+                        <span>{{ job.job_type }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex items-center">
+                        <i class="fas fa-clock mr-2 text-primary-600"></i>
+                        <span>Posted {{ job.date_posted.strftime('%B %d, %Y') }}</span>
+                    </div>
+                </div>
+                
+                {% if job.salary_min and job.salary_max %}
+                <div class="flex items-center text-lg font-semibold text-green-600 mb-4">
+                    <i class="fas fa-dollar-sign mr-2"></i>
+                    ${{ "{:,}".format(job.salary_min) }} - ${{ "{:,}".format(job.salary_max) }}
+                    {% if job.salary_type %}
+                        <span class="text-sm text-gray-500 ml-2">{{ job.salary_type }}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- Match Score (if available) -->
+                {% if ai_analysis and ai_analysis.get('match_score') %}
+                <div class="flex items-center mb-4">
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium mr-3">
+                        {{ "%.0f"|format(ai_analysis.match_score * 100) }}% Match
+                    </span>
+                    <span class="text-gray-600 text-sm">Based on your profile</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-col space-y-3 ml-6">
+                <button class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Apply Now
+                </button>
+                <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors flex items-center">
+                    <i class="fas fa-bookmark mr-2"></i>
+                    Save Job
+                </button>
+                <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors flex items-center">
+                    <i class="fas fa-share mr-2"></i>
+                    Share
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+            <!-- Job Description -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-info-circle text-primary-600 mr-2"></i>
+                    Job Description
+                </h2>
+                <div class="prose max-w-none text-gray-700">
+                    <p>{{ job.description }}</p>
+                </div>
+            </div>
+            
+            <!-- Requirements -->
+            {% if job.requirements %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-list-check text-primary-600 mr-2"></i>
+                    Requirements
+                </h2>
+                <div class="prose max-w-none text-gray-700">
+                    <p>{{ job.requirements }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Responsibilities -->
+            {% if job.responsibilities %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-tasks text-primary-600 mr-2"></i>
+                    Responsibilities
+                </h2>
+                <div class="prose max-w-none text-gray-700">
+                    <p>{{ job.responsibilities }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- AI Analysis -->
+            {% if ai_analysis %}
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 mb-8 border border-blue-200">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-brain text-blue-600 mr-2"></i>
+                    AI Insights
+                </h2>
+                
+                {% if ai_analysis.get('match_explanation') %}
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">Why This Job Matches You</h3>
+                    <p class="text-gray-700">{{ ai_analysis.match_explanation }}</p>
+                </div>
+                {% endif %}
+                
+                {% if ai_analysis.get('key_skills') %}
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-800 mb-3">Key Skills for This Role</h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for skill in ai_analysis.key_skills %}
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                            {{ skill }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if ai_analysis.get('complexity_level') %}
+                <div class="mb-4">
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">Role Complexity</h3>
+                    <div class="flex items-center">
+                        <span class="text-gray-700 mr-3">{{ ai_analysis.complexity_level }}</span>
+                        <div class="flex-1 bg-gray-200 rounded-full h-2 max-w-xs">
+                            <div class="bg-blue-500 h-2 rounded-full" 
+                                 style="width: {% if ai_analysis.complexity_level == 'Entry Level' %}25{% elif ai_analysis.complexity_level == 'Mid Level' %}50{% elif ai_analysis.complexity_level == 'Senior Level' %}75{% else %}100{% endif %}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <!-- Company Info -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-building text-primary-600 mr-2"></i>
+                    About {{ job.company }}
+                </h3>
+                {% if job.company_description %}
+                <p class="text-gray-700 text-sm mb-4">{{ job.company_description[:200] }}...</p>
+                {% endif %}
+                <div class="space-y-2 text-sm">
+                    {% if job.industry %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Industry:</span>
+                        <span class="font-medium">{{ job.industry }}</span>
+                    </div>
+                    {% endif %}
+                    {% if job.company_size %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Company Size:</span>
+                        <span class="font-medium">{{ job.company_size }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Posted:</span>
+                        <span class="font-medium">{{ job.date_posted.strftime('%b %d, %Y') }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Required Skills -->
+            {% if job.skills_required or job.skills_preferred %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-cogs text-primary-600 mr-2"></i>
+                    Skills
+                </h3>
+                
+                {% if job.skills_required %}
+                <div class="mb-4">
+                    <h4 class="font-medium text-gray-800 mb-2">Required</h4>
+                    <div class="flex flex-wrap gap-2">
+                        {% for skill in job.skills_required %}
+                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">
+                            {{ skill }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if job.skills_preferred %}
+                <div>
+                    <h4 class="font-medium text-gray-800 mb-2">Preferred</h4>
+                    <div class="flex flex-wrap gap-2">
+                        {% for skill in job.skills_preferred %}
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                            {{ skill }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- Job Details -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-info text-primary-600 mr-2"></i>
+                    Job Details
+                </h3>
+                <div class="space-y-3 text-sm">
+                    {% if job.experience_level %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Experience Level:</span>
+                        <span class="font-medium">{{ job.experience_level }}</span>
+                    </div>
+                    {% endif %}
+                    {% if job.job_type %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Job Type:</span>
+                        <span class="font-medium">{{ job.job_type }}</span>
+                    </div>
+                    {% endif %}
+                    {% if job.remote_ok %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Remote Work:</span>
+                        <span class="font-medium text-green-600">
+                            <i class="fas fa-check mr-1"></i>Available
+                        </span>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Job ID:</span>
+                        <span class="font-medium text-xs text-gray-400">{{ job.job_id }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Similar Jobs -->
+            {% if similar_jobs %}
+            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-list text-primary-600 mr-2"></i>
+                    Similar Jobs
+                </h3>
+                <div class="space-y-3">
+                    {% for similar_job in similar_jobs %}
+                    <div class="border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
+                        <a href="{{ url_for('job_detail', job_id=similar_job.job_id) }}" 
+                           class="block hover:text-primary-600 transition-colors">
+                            <h4 class="font-medium text-sm text-gray-900 mb-1">{{ similar_job.job_title }}</h4>
+                            <p class="text-xs text-gray-600">{{ similar_job.company }}</p>
+                            {% if similar_job.semantic_score %}
+                            <div class="flex items-center mt-1">
+                                <div class="flex-1 bg-gray-200 rounded-full h-1 mr-2">
+                                    <div class="bg-primary-500 h-1 rounded-full" 
+                                         style="width: {{ similar_job.semantic_score * 100 }}%">
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-500">{{ "%.0f"|format(similar_job.semantic_score * 100) }}%</span>
+                            </div>
+                            {% endif %}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply button functionality
+    const applyButton = document.querySelector('.bg-primary-600');
+    if (applyButton) {
+        applyButton.addEventListener('click', function() {
+            // TODO: Implement job application
+            alert('Job application feature coming soon!');
+        });
+    }
+    
+    // Save job functionality
+    const saveButton = document.querySelector('.fas.fa-bookmark').parentElement;
+    if (saveButton) {
+        saveButton.addEventListener('click', function() {
+            // TODO: Implement job saving
+            this.classList.toggle('text-yellow-500');
+            this.classList.toggle('text-gray-700');
+        });
+    }
+    
+    // Share functionality
+    const shareButton = document.querySelector('.fas.fa-share').parentElement;
+    if (shareButton) {
+        shareButton.addEventListener('click', function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{ job.title }} at {{ job.company }}',
+                    text: 'Check out this job opportunity on JobPilot',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href);
+                alert('Job link copied to clipboard!');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

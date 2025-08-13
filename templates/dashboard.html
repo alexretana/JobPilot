@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - JobPilot{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Your Dashboard</h1>
+        <p class="text-gray-600">AI-powered job recommendations tailored just for you.</p>
+    </div>
+    
+    <!-- Profile Completion Card -->
+    {% if profile_completion < 100 %}
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 p-6 mb-8 rounded-lg">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Complete Your Profile</h3>
+                <p class="text-gray-600 mb-3">Get better job recommendations by completing your profile.</p>
+                <div class="flex items-center">
+                    <div class="flex-1 bg-gray-200 rounded-full h-3 mr-4">
+                        <div class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: {{ profile_completion }}%"></div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700">{{ profile_completion }}%</span>
+                </div>
+            </div>
+            <a href="{{ url_for('profile') }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-edit mr-2"></i>
+                Update Profile
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+            <!-- Job Recommendations -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900">
+                        <i class="fas fa-star text-yellow-500 mr-2"></i>
+                        Recommended for You
+                    </h2>
+                    <a href="{{ url_for('search') }}" class="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                        View All Jobs →
+                    </a>
+                </div>
+                
+                {% if recommendations %}
+                    <div class="space-y-4">
+                        {% for job in recommendations %}
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <div class="flex items-center mb-2">
+                                        <h3 class="text-lg font-semibold text-gray-900 mr-3">{{ job.job_title }}</h3>
+                                        {% if job.overall_score %}
+                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                                            {{ "%.0f"|format(job.overall_score * 100) }}% Match
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="text-gray-600 mb-2">
+                                        <i class="fas fa-building mr-1"></i>{{ job.company }}
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-map-marker-alt mr-1"></i>{{ job.location }}
+                                    </p>
+                                    {% if job.salary_min and job.salary_max %}
+                                    <p class="text-gray-600 mb-2">
+                                        <i class="fas fa-dollar-sign mr-1"></i>${{ "{:,}".format(job.salary_min) }} - ${{ "{:,}".format(job.salary_max) }}
+                                    </p>
+                                    {% endif %}
+                                    <div class="text-sm text-gray-500 line-clamp-2">
+                                        {{ job.description[:150] }}...
+                                    </div>
+                                    {% if job.skills_match_score and job.experience_match_score %}
+                                    <div class="flex items-center mt-3 space-x-4 text-xs">
+                                        <div class="flex items-center">
+                                            <span class="text-gray-500 mr-1">Skills:</span>
+                                            <div class="w-12 bg-gray-200 rounded-full h-2 mr-2">
+                                                <div class="bg-blue-500 h-2 rounded-full" style="width: {{ job.skills_match_score * 100 }}%"></div>
+                                            </div>
+                                            <span class="text-gray-600">{{ "%.0f"|format(job.skills_match_score * 100) }}%</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="text-gray-500 mr-1">Experience:</span>
+                                            <div class="w-12 bg-gray-200 rounded-full h-2 mr-2">
+                                                <div class="bg-green-500 h-2 rounded-full" style="width: {{ job.experience_match_score * 100 }}%"></div>
+                                            </div>
+                                            <span class="text-gray-600">{{ "%.0f"|format(job.experience_match_score * 100) }}%</span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex flex-col space-y-2 ml-4">
+                                    <a href="{{ url_for('job_detail', job_id=job.job_id) }}" 
+                                       class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium text-center transition-colors">
+                                        View Details
+                                    </a>
+                                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                        <i class="fas fa-bookmark mr-1"></i>
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-search text-gray-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Recommendations Yet</h3>
+                        <p class="text-gray-600 mb-6">Complete your profile to get personalized job recommendations.</p>
+                        <a href="{{ url_for('profile') }}" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                            Complete Profile
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Recent Applications -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">
+                    <i class="fas fa-paper-plane text-blue-600 mr-2"></i>
+                    Recent Applications
+                </h2>
+                
+                {% if applications %}
+                    <div class="space-y-4">
+                        {% for application in applications %}
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">{{ application.job_title }}</h3>
+                                    <p class="text-gray-600">{{ application.company }}</p>
+                                    <p class="text-sm text-gray-500">Applied {{ application.applied_date.strftime('%B %d, %Y') }}</p>
+                                </div>
+                                <span class="px-2 py-1 rounded-full text-xs font-medium
+                                    {% if application.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif application.status == 'interview' %}bg-blue-100 text-blue-800
+                                    {% elif application.status == 'accepted' %}bg-green-100 text-green-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ application.status.title() }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h3>
+                        <p class="text-gray-600 mb-6">Start applying to jobs to track your applications here.</p>
+                        <a href="{{ url_for('search') }}" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                            Find Jobs
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <!-- Quick Stats -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-chart-bar text-green-600 mr-2"></i>
+                    Your Stats
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Profile Completion</span>
+                        <span class="font-medium">{{ profile_completion }}%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Job Views</span>
+                        <span class="font-medium">{{ applications|length or 0 }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Applications</span>
+                        <span class="font-medium">{{ applications|length or 0 }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Saved Jobs</span>
+                        <span class="font-medium">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-bolt text-yellow-600 mr-2"></i>
+                    Quick Actions
+                </h3>
+                <div class="space-y-3">
+                    <a href="{{ url_for('search') }}" class="block w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-search mr-2 text-gray-600"></i>
+                        Search Jobs
+                    </a>
+                    <a href="{{ url_for('profile') }}" class="block w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-user mr-2 text-gray-600"></i>
+                        Update Profile
+                    </a>
+                    <button class="block w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-bell mr-2 text-gray-600"></i>
+                        Job Alerts
+                    </button>
+                    <button class="block w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-file-alt mr-2 text-gray-600"></i>
+                        Resume Builder
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tips -->
+            <div class="bg-gradient-to-br from-primary-50 to-semantic-50 rounded-lg p-6 border border-primary-100">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                    Pro Tips
+                </h3>
+                <ul class="text-sm text-gray-700 space-y-2">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5 flex-shrink-0"></i>
+                        Complete your profile to get 3x more job matches
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5 flex-shrink-0"></i>
+                        Use specific skills and keywords in your searches
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5 flex-shrink-0"></i>
+                        Set up job alerts for your favorite searches
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5 flex-shrink-0"></i>
+                        Apply to jobs within 24 hours of posting
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Save job functionality
+    const saveButtons = document.querySelectorAll('.save-job-btn');
+    saveButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // TODO: Implement job saving
+            console.log('Save job clicked');
+        });
+    });
+    
+    // Auto-refresh recommendations every 30 minutes
+    setInterval(() => {
+        // Could implement auto-refresh here
+        console.log('Could refresh recommendations');
+    }, 30 * 60 * 1000);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - JobPilot{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Your Profile</h1>
+        <p class="text-gray-600">Complete your profile to get personalized job recommendations powered by AI.</p>
+    </div>
+    
+    <!-- Profile Form -->
+    <form method="POST" class="space-y-8">
+        <!-- Personal Information -->
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                <i class="fas fa-user mr-2 text-primary-600"></i>
+                Personal Information
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                    <input 
+                        type="text" 
+                        id="first_name" 
+                        name="first_name" 
+                        value="{{ user_profile.first_name or '' }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="Your first name"
+                    >
+                </div>
+                
+                <div>
+                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                    <input 
+                        type="text" 
+                        id="last_name" 
+                        name="last_name" 
+                        value="{{ user_profile.last_name or '' }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="Your last name"
+                    >
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        value="{{ user_profile.email or '' }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="your.email@example.com"
+                    >
+                </div>
+            </div>
+        </div>
+        
+        <!-- Professional Information -->
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                <i class="fas fa-briefcase mr-2 text-primary-600"></i>
+                Professional Information
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="current_title" class="block text-sm font-medium text-gray-700 mb-2">Current Job Title</label>
+                    <input 
+                        type="text" 
+                        id="current_title" 
+                        name="current_title" 
+                        value="{{ user_profile.current_title or '' }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="e.g., Software Engineer, Product Manager"
+                    >
+                </div>
+                
+                <div>
+                    <label for="experience_years" class="block text-sm font-medium text-gray-700 mb-2">Years of Experience</label>
+                    <select 
+                        id="experience_years" 
+                        name="experience_years" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    >
+                        <option value="">Select experience</option>
+                        {% for i in range(0, 21) %}
+                        <option value="{{ i }}" {% if user_profile.get('experience_years') == i %}selected{% endif %}>
+                                {% if i == 0 %}Entry level{% elif i == 1 %}1 year{% else %}{{ i }} years{% endif %}
+                            </option>
+                        {% endfor %}
+                        <option value="20" {% if user_profile.get('experience_years', 0) > 20 %}selected{% endif %}>20+ years</option>
+                    </select>
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label for="skills" class="block text-sm font-medium text-gray-700 mb-2">Skills</label>
+                    <input 
+                        type="text" 
+                        id="skills" 
+                        name="skills" 
+                        value="{% if user_profile.skills %}{{ user_profile.skills | join(', ') }}{% endif %}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="Python, JavaScript, Project Management, AWS (separate with commas)"
+                    >
+                    <p class="text-sm text-gray-500 mt-1">Separate skills with commas. This helps our AI find better job matches.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Job Preferences -->
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                <i class="fas fa-map-marker-alt mr-2 text-primary-600"></i>
+                Job Preferences
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label for="preferred_locations" class="block text-sm font-medium text-gray-700 mb-2">Preferred Locations</label>
+                    <input 
+                        type="text" 
+                        id="preferred_locations" 
+                        name="preferred_locations" 
+                        value="{% if user_profile.preferred_locations %}{{ user_profile.preferred_locations | join(', ') }}{% endif %}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="San Francisco, Remote, New York (separate with commas)"
+                    >
+                </div>
+                
+                <div>
+                    <label for="desired_salary_min" class="block text-sm font-medium text-gray-700 mb-2">Minimum Salary</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <input 
+                            type="number" 
+                            id="desired_salary_min" 
+                            name="desired_salary_min" 
+                            value="{{ user_profile.desired_salary_min or '' }}"
+                            class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            placeholder="75000"
+                        >
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="desired_salary_max" class="block text-sm font-medium text-gray-700 mb-2">Maximum Salary</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <input 
+                            type="number" 
+                            id="desired_salary_max" 
+                            name="desired_salary_max" 
+                            value="{{ user_profile.desired_salary_max or '' }}"
+                            class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            placeholder="150000"
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bio Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                <i class="fas fa-pencil-alt mr-2 text-primary-600"></i>
+                Professional Summary
+            </h2>
+            
+            <div>
+                <label for="bio" class="block text-sm font-medium text-gray-700 mb-2">About You</label>
+                <textarea 
+                    id="bio" 
+                    name="bio" 
+                    rows="4"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    placeholder="Tell us about your professional background, goals, and what you're looking for in your next role..."
+                >{{ user_profile.bio or '' }}</textarea>
+                <p class="text-sm text-gray-500 mt-1">This helps our AI provide better job matches and application strategies.</p>
+            </div>
+        </div>
+        
+        <!-- Submit Button -->
+        <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600">
+                <i class="fas fa-shield-alt text-green-500 mr-1"></i>
+                Your data is stored securely and only used for job matching.
+            </div>
+            
+            <button 
+                type="submit" 
+                class="px-8 py-3 bg-gradient-to-r from-primary-600 to-semantic-600 text-white font-semibold rounded-lg hover:from-primary-700 hover:to-semantic-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+            >
+                <i class="fas fa-save mr-2"></i>
+                Save Profile
+            </button>
+        </div>
+    </form>
+    
+    <!-- Actions -->
+    {% if is_authenticated %}
+        <div class="mt-8 flex flex-col sm:flex-row gap-4">
+            <a href="{{ url_for('dashboard') }}" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors text-center">
+                <i class="fas fa-tachometer-alt mr-2"></i>
+                View Dashboard
+            </a>
+            
+            <a href="{{ url_for('search') }}" class="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors text-center">
+                <i class="fas fa-search mr-2"></i>
+                Search Jobs
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-save functionality (optional)
+    const form = document.querySelector('form');
+    let timeout;
+    
+    // Auto-save on input changes (debounced)
+    form.addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            // Could implement auto-save here
+            console.log('Form changed - could auto-save');
+        }, 2000);
+    });
+    
+    // Skill suggestions (could be enhanced with API)
+    const skillsInput = document.getElementById('skills');
+    skillsInput.addEventListener('input', function() {
+        // Could add skill suggestions dropdown here
+    });
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const requiredFields = ['first_name', 'last_name', 'current_title'];
+        let hasErrors = false;
+        
+        requiredFields.forEach(fieldName => {
+            const field = document.getElementById(fieldName);
+            if (!field.value.trim()) {
+                field.classList.add('border-red-500');
+                hasErrors = true;
+            } else {
+                field.classList.remove('border-red-500');
+            }
+        });
+        
+        if (hasErrors) {
+            e.preventDefault();
+            alert('Please fill in all required fields (Name and Job Title).');
+        }
+    });
+});
+</script>
+{% endblock %}

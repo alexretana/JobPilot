@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - JobPilot{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4">
+    <div class="text-center max-w-lg mx-auto">
+        <!-- Error Icon -->
+        <div class="w-32 h-32 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-8">
+            <i class="fas fa-exclamation-triangle text-6xl text-white"></i>
+        </div>
+        
+        <!-- Error Message -->
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            Something Went Wrong
+        </h1>
+        
+        <p class="text-lg text-gray-600 mb-8">
+            We're experiencing some technical difficulties. Our team has been notified and is working to fix this issue.
+        </p>
+        
+        <!-- Action Buttons -->
+        <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+            <button onclick="window.location.reload()" class="inline-flex items-center justify-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors w-full sm:w-auto">
+                <i class="fas fa-redo mr-2"></i>
+                Try Again
+            </button>
+            
+            <a href="{{ url_for('index') }}" class="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors w-full sm:w-auto">
+                <i class="fas fa-home mr-2"></i>
+                Go Home
+            </a>
+        </div>
+        
+        <!-- Help Text -->
+        <div class="mt-12 p-6 bg-gray-50 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">
+                <i class="fas fa-tools text-blue-500 mr-2"></i>
+                What happened?
+            </h3>
+            <p class="text-gray-600 mb-4">
+                This error is temporary and we're working to resolve it. In the meantime:
+            </p>
+            <div class="space-y-2 text-left">
+                <div class="flex items-start">
+                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                    <span class="text-gray-600">Try refreshing the page</span>
+                </div>
+                <div class="flex items-start">
+                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                    <span class="text-gray-600">Check back in a few minutes</span>
+                </div>
+                <div class="flex items-start">
+                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                    <span class="text-gray-600">Visit our homepage to continue job searching</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Error Code (for developers) -->
+        <div class="mt-6 text-xs text-gray-400">
+            Error 500 - Internal Server Error
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}JobPilot - AI-Powered Job Search{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="relative bg-gradient-to-br from-primary-600 via-primary-700 to-semantic-600 overflow-hidden">
+    <!-- Background decoration -->
+    <div class="absolute inset-0">
+        <svg class="absolute bottom-0 left-0 right-0" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,160L48,144C96,128,192,96,288,106.7C384,117,480,171,576,186.7C672,203,768,181,864,154.7C960,128,1056,96,1152,101.3C1248,107,1344,149,1392,170.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" fill="rgba(255,255,255,0.1)"/>
+        </svg>
+    </div>
+    
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+        <div class="text-center">
+            <h1 class="text-4xl lg:text-6xl font-bold text-white mb-6">
+                Find Your Perfect Job with
+                <span class="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">AI Intelligence</span>
+            </h1>
+            
+            <p class="text-xl lg:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
+                JobPilot uses advanced semantic matching to understand your career goals and connect you with opportunities that truly fit your skills and aspirations.
+            </p>
+            
+            <!-- Main Search Form -->
+            <form action="{{ url_for('search') }}" method="GET" class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-2xl p-6 lg:p-8">
+                    <div class="flex flex-col lg:flex-row gap-4">
+                        <div class="flex-1">
+                            <label for="search-query" class="sr-only">Job search query</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    id="search-query"
+                                    name="q" 
+                                    class="block w-full pl-10 pr-3 py-4 border-0 text-lg placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-xl"
+                                    placeholder="e.g., Python Developer, Machine Learning Engineer, Remote Jobs..."
+                                    autocomplete="off"
+                                >
+                            </div>
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            class="lg:w-48 bg-gradient-to-r from-primary-500 to-semantic-500 text-white font-semibold py-4 px-8 rounded-xl hover:from-primary-600 hover:to-semantic-600 transform hover:scale-105 transition-all duration-200 shadow-lg"
+                        >
+                            <i class="fas fa-rocket mr-2"></i>
+                            Search Jobs
+                        </button>
+                    </div>
+                    
+                    <!-- Quick search suggestions -->
+                    <div class="mt-4 flex flex-wrap gap-2 justify-center">
+                        {% for suggestion in search_suggestions %}
+                            <button 
+                                type="button" 
+                                onclick="document.getElementById('search-query').value='{{ suggestion }}'; this.form.submit();"
+                                class="px-3 py-1 text-sm bg-gray-100 hover:bg-primary-100 text-gray-700 hover:text-primary-700 rounded-full transition-colors duration-200"
+                            >
+                                {{ suggestion }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                Why Choose JobPilot?
+            </h2>
+            <p class="text-xl text-gray-600">
+                Experience the future of job searching with AI-powered matching
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Feature 1: Semantic Search -->
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-brain text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Semantic Understanding</h3>
+                <p class="text-gray-600">
+                    Our AI understands context, not just keywords. Search for "machine learning" and find relevant AI, data science, and analytics roles.
+                </p>
+            </div>
+            
+            <!-- Feature 2: Personalized Matching -->
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-gradient-to-r from-semantic-500 to-semantic-600 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-user-cog text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Personalized Recommendations</h3>
+                <p class="text-gray-600">
+                    Create your profile and get job matches tailored to your skills, experience level, salary expectations, and location preferences.
+                </p>
+            </div>
+            
+            <!-- Feature 3: AI Analysis -->
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-robot text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">AI-Powered Analysis</h3>
+                <p class="text-gray-600">
+                    Get detailed job analysis, skill gap identification, and application strategies powered by advanced language models.
+                </p>
+            </div>
+            
+            <!-- Feature 4: Real-time Matching -->
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-bolt text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Lightning Fast</h3>
+                <p class="text-gray-600">
+                    Get search results in milliseconds. Our optimized semantic engine processes thousands of jobs instantly.
+                </p>
+            </div>
+            
+            <!-- Feature 5: Similarity Discovery -->
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-sitemap text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Smart Discovery</h3>
+                <p class="text-gray-600">
+                    Discover similar jobs and related opportunities you might have missed. Expand your search horizon intelligently.
+                </p>
+            </div>
+            
+            <!-- Feature 6: Career Insights -->
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-chart-line text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Career Insights</h3>
+                <p class="text-gray-600">
+                    Understand job market trends, skill requirements, and career progression paths with data-driven insights.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Jobs Section -->
+{% if recent_jobs %}
+<div class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                Latest Opportunities
+            </h2>
+            <p class="text-xl text-gray-600">
+                Fresh job postings from top companies
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for job in recent_jobs %}
+                <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-100">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                                <a href="{{ url_for('job_detail', job_id=job.id) }}" class="hover:text-primary-600 transition-colors">
+                                    {{ job.title }}
+                                </a>
+                            </h3>
+                            <div class="flex items-center text-sm text-gray-600 mb-2">
+                                <i class="fas fa-building mr-2"></i>
+                                {{ job.company }}
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600 mb-3">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                {{ job.location or 'Location not specified' }}
+                            </div>
+                        </div>
+                        
+                        {% if job.remote_type %}
+                            <span class="px-2 py-1 text-xs font-medium rounded-full {% if job.remote_type == 'Remote' %}bg-green-100 text-green-800{% elif job.remote_type == 'Hybrid' %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ job.remote_type }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if job.skills_required %}
+                        <div class="mb-4">
+                            <div class="flex flex-wrap gap-1">
+                                {% for skill in job.skills_required[:3] %}
+                                    <span class="px-2 py-1 text-xs bg-primary-100 text-primary-800 rounded-full">
+                                        {{ skill }}
+                                    </span>
+                                {% endfor %}
+                                {% if job.skills_required|length > 3 %}
+                                    <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+                                        +{{ job.skills_required|length - 3 }} more
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="flex items-center justify-between">
+                        {% if job.salary_min or job.salary_max %}
+                            <div class="text-sm font-medium text-gray-900">
+                                <i class="fas fa-dollar-sign mr-1 text-green-500"></i>
+                                {% if job.salary_min and job.salary_max %}
+                                    ${{ "{:,}".format(job.salary_min) }} - ${{ "{:,}".format(job.salary_max) }}
+                                {% elif job.salary_min %}
+                                    ${{ "{:,}".format(job.salary_min) }}+
+                                {% else %}
+                                    Up to ${{ "{:,}".format(job.salary_max) }}
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="text-sm text-gray-500">Salary not specified</div>
+                        {% endif %}
+                        
+                        <div class="text-xs text-gray-400">
+                            {% if job.posted_date %}
+                                {{ job.posted_date.strftime('%b %d') }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-12">
+            <a href="{{ url_for('search') }}" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors">
+                <i class="fas fa-search mr-2"></i>
+                View All Jobs
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- CTA Section -->
+<div class="py-16 bg-gradient-to-r from-primary-600 to-semantic-600">
+    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">
+            Ready to Find Your Dream Job?
+        </h2>
+        <p class="text-xl text-blue-100 mb-8">
+            Create your profile and let AI match you with perfect opportunities
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            {% if not is_authenticated %}
+                <a href="{{ url_for('profile') }}" class="inline-flex items-center px-8 py-4 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors shadow-lg">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Create Your Profile
+                </a>
+            {% endif %}
+            <a href="{{ url_for('search') }}" class="inline-flex items-center px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-primary-600 transition-colors">
+                <i class="fas fa-rocket mr-2"></i>
+                Start Searching
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div class="space-y-2">
+                <div class="text-3xl font-bold text-primary-600">{{ app_stats.total_jobs or 0 }}+</div>
+                <div class="text-sm text-gray-600">Active Jobs</div>
+            </div>
+            <div class="space-y-2">
+                <div class="text-3xl font-bold text-semantic-600">{{ app_stats.total_applications or 0 }}+</div>
+                <div class="text-sm text-gray-600">Applications</div>
+            </div>
+            <div class="space-y-2">
+                <div class="text-3xl font-bold text-purple-600">AI</div>
+                <div class="text-sm text-gray-600">Powered</div>
+            </div>
+            <div class="space-y-2">
+                <div class="text-3xl font-bold text-orange-600">24/7</div>
+                <div class="text-sm text-gray-600">Available</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-query');
+    
+    // Focus search input on page load
+    if (searchInput) {
+        searchInput.focus();
+        
+        // Add search suggestions functionality
+        let suggestionTimeout;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(suggestionTimeout);
+            const query = this.value.trim();
+            
+            if (query.length >= 2) {
+                suggestionTimeout = setTimeout(() => {
+                    fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(suggestions => {
+                            // Could implement dropdown suggestions here
+                            console.log('Search suggestions:', suggestions);
+                        })
+                        .catch(error => console.error('Error fetching suggestions:', error));
+                }, 300);
+            }
+        });
+    }
+    
+    // Add smooth scroll animation for links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
